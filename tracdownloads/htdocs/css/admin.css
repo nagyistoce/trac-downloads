@@ -1,0 +1,53 @@
+/*  General styles */
+form#downloadplugin
+{
+  overflow: auto;
+}
+table.listing
+{
+  text-align: left;
+}
+.listing td.id
+{
+  width: 1%;
+}
+#enhanced #file {
+  font-size: 9px;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  width: 150px;
+  opacity:0;
+  filter: alpha(opacity = 0);
+  -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+}
+#enhanced .fileobject {
+  cursor: default;
+  height: 24px;
+  opacity: 0;
+  width: 220px;
+  z-index: 2;
+}
+#enhanced .button {
+  float: left;
+  height: 24px;
+  position: relative;
+  width: 17px;
+  z-index: 1;
+  cursor: pointer;
+}
+#enhanced #file_filename {
+  border-color: #D7D7D7 -moz-use-text-color #D7D7D7 #D7D7D7;
+  border-style: solid none solid solid;
+  border-width: 1px 0 1px 1px;
+  clear: left;
+  float: left;
+  font-family: Verdana;
+  font-size: 8pt;
+  height: 12px;
+  padding: 5px;
+  overflow: hidden;
+  width: 200px;
+  white-space: nowrap;
+  background-color: #FFFFFF;
+}

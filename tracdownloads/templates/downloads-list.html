@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:py="http://genshi.edgewall.org/">
+  <xi:include href="downloads-macros.html"/>
+  <xi:include href="layout.html"/>
+  <head>
+    <title>Downloads</title>
+  </head>
+
+  <body>
+    <div id="content" class="downloads">
+      <div class="title">
+        <h1>${downloads.title}</h1>
+      </div>
+
+      ${wiki_to_html(context(parent), downloads.description)}
+
+      <form py:if="'DOWNLOADS_ADMIN' in perm" method="post" action="${href.downloads()}">
+        <fieldset>
+          <legend>
+            Edit Description:
+          </legend>
+
+          <div py:if="req.args.action == 'edit'" class="field">
+            <textarea id="description" name="description" class="wikitext" rows="10" cols="78">${downloads.description}</textarea>
+          </div>
+
+          <div class="buttons">
+            <input type="submit" name="submit" value="Edit"/>
+            <py:choose>
+              <py:when test="req.args.action == 'edit'">
+                <input type="button" name="cancel" value="Cancel" onclick="location.replace('${href.downloads()}?order=${downloads.order};desc=${downloads.desc}')"/>
+                <input type="hidden" name="action" value="post-edit"/>
+              </py:when>
+              <py:otherwise>
+                <input type="hidden" name="action" value="edit"/>
+              </py:otherwise>
+            </py:choose>
+            <input type="hidden" name="order" value="${downloads.order}"/>
+            <input type="hidden" name="desc" value="${downloads.desc}"/>
+          </div>
+        </fieldset>
+      </form>
+
+      ${display_downloads(downloads, href.downloads())}
+
+    </div>
+
+  </body>
+
+</html>

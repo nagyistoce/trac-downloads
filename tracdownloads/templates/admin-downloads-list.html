@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:py="http://genshi.edgewall.org/">
+  <xi:include href="downloads-macros.html"/>
+  <xi:include href="admin.html"/>
+  <head>
+    <title>Downloads</title>
+    <script type="text/javascript">
+        function do_confirm() {
+            var actionSelect = document.getElementById("actionselector");
+            var idx = actionSelect.selectedIndex;
+            if (actionSelect.options[idx].value != 'delete')
+                return true;
+            return confirm("Are you sure you want to delete the file?");
+     	  }
+    </script>
+  </head>
+
+  <body>
+
+    <h2>Downloads</h2>
+    <form class="addnew" enctype="multipart/form-data" method="post" action="${panel_href()}">
+      <div class="shaded-box">
+        <fieldset id="rightpanel">
+          <legend>
+            <py:choose>
+              <py:when test="downloads.download.id">Edit Download:</py:when>
+              <py:otherwise>Add Download:</py:otherwise>
+            </py:choose>
+          </legend>
+          <div class="inputrow">
+            <div class="headtextfield">File:</div>
+            <div id="enhanced" class="inputfield"><input type="file" id="file" name="file" size="24" style="display: none"/></div>
+          </div>
+          <div class="inputrow">
+            <div class="headtextfield">Description:</div>
+            <div class="inputfield"><input type="text" id="description" name="description" value="${downloads.download.description}"/></div>
+          </div>
+          <div class="inputrow" py:if="downloads.has_tags">>
+            <div class="headtextfield">Additional Tags:</div>
+            <div class="inputfield"><input type="text" id="tags" name="tags" value="${downloads.download.tags}"/></div>
+          </div>
+          <div class="inputrow">
+            <div class="headtextfield">Component:</div>
+            <div class="inputfield">
+              <select id="component" name="component" py:attrs="downloads.cstate">
+                <py:for each="component in downloads.components">
+                  <py:choose>
+                    <option py:when="downloads.download.component == component.name" value="${component.name}" selected="selected">${component.name}</option>
+                    <option py:otherwise="" value="${component.name}">${component.name}</option>
+                  </py:choose>
+                </py:for>
+              </select>
+            </div>
+          </div>
+          <div class="inputrow">
+            <div class="headtextfield">Version:</div>
+            <div class="inputfield">
+              <select id="version" name="version" py:attrs="downloads.vstate">
+                <py:for each="version in downloads.versions">
+                  <py:choose>
+                    <option py:when="downloads.download.version == version.name" value="${version.name}" selected="selected">${version.name}</option>
+                    <option py:otherwise="" value="${version.name}">${version.name}</option>
+                  </py:choose>
+                </py:for>
+              </select>
+            </div>
+          </div>
+          <div class="inputrow">
+            <div class="headtextfield">Platform:</div>
+            <div class="inputfield">
+              <select id="platform" name="platform" py:attrs="downloads.pstate">
+                <py:for each="platform in downloads.platforms">
+                  <py:choose>
+                    <option py:when="downloads.download.platform == platform.id" value="${platform.id}" selected="selected">${platform.name}</option>
+                    <option py:otherwise="" value="${platform.id}">${platform.name}</option>
+                  </py:choose>
+                </py:for>
+              </select>
+            </div>
+          </div>
+          <div class="inputrow">
+            <div class="headtextfield">Type:</div>
+            <div class="inputfield">
+              <select id="type" name="type" py:attrs="downloads.tstate">
+                <py:for each="type in downloads.types">
+                  <py:choose>
+                    <option py:when="downloads.download.type == type.id" value="${type.id}" selected="selected">${type.name}</option>
+                    <option py:otherwise="" value="${type.id}">${type.name}</option>
+                  </py:choose>
+                </py:for>
+              </select>
+            </div>
+          </div>
+          <div class="buttons">
+           <py:choose>
+            <py:when test="downloads.download.id">
+              <span class="primaryButton" style="margin-right: 5px;">
+                <input id="editbtn" type="submit" name="submit" value="Edit"/>
+              </span>
+              <span class="primaryButton">
+                <input type="button" name="cancel" value="Cancel" onclick="location.href = '${panel_href()}?order=${downloads.order};desc=${downloads.desc}'"/>
+              </span>
+              <input type="hidden" name="id" value="${downloads.download.id}"/>
+              <input type="hidden" name="action" value="post-edit"/>
+            </py:when>
+            <py:otherwise>
+              <span class="primaryButton">
+                <input type="submit" name="submit" value="Add"/>
+                <input type="hidden" name="action" value="post-add"/>
+              </span>
+            </py:otherwise>
+           </py:choose>
+           <input type="hidden" name="order" value="${downloads.order}"/>
+           <input type="hidden" name="desc" value="${downloads.desc}"/>
+          </div>
+        </fieldset>
+      </div>
+    </form>
+
+    <py:choose>
+    <py:when test="len(downloads.downloads) > 0">
+    <form id="downloadplugin" method="post" action="${panel_href()}?order=${downloads.order};desc=${downloads.desc}">
+      <table class="listing">
+        <thead>
+          <tr>
+            <th class="sel">&nbsp;</th>
+            <th class="sel featured">Feat.</th>
+            ${sortable_th(downloads.order, downloads.desc, 'id', 'ID', panel_href())}
+            ${sortable_th(downloads.order, downloads.desc, 'file', 'File', panel_href())}
+            ${sortable_th(downloads.order, downloads.desc, 'size', 'Size', panel_href())}
+            ${sortable_th(downloads.order, downloads.desc, 'count', 'Dls', panel_href())}
+            ${sortable_th(downloads.order, downloads.desc, 'platform', 'Platform', panel_href())}
+            ${sortable_th(downloads.order, downloads.desc, 'time', 'Uploaded', panel_href())}
+            <th class="sel more">..</th>
+          </tr>
+        </thead>
+        <tbody>
+          <py:for each="line, download in enumerate(downloads.downloads)">
+            <tr class="download ${line % 2 and 'even' or 'odd'}">
+              <td class="sel">
+                <input type="checkbox" name="selection" value="${download.id}"/>
+              </td>
+              <td py:if="download.featured == 1" class="featured"></td>
+              <td py:if="not download.featured == 1"></td>
+              <td class="id">
+                <div class="id">
+                  <a href="${panel_href(download.id)}?order=${downloads.order};desc=${downloads.desc}">
+                    ${download.id}
+                  </a>
+                </div>
+              </td>
+              <td class="file">
+                <div class="file">
+                  <a href="${panel_href(download.id)}?order=${downloads.order};desc=${downloads.desc}">
+                    ${download.file}
+                  </a>
+                </div>
+              </td>
+              <td class="size">
+                <div class="size">
+                  <a href="${panel_href(download.id)}?order=${downloads.order};desc=${downloads.desc}">
+                    ${pretty_size(download.size)}
+                  </a>
+                </div>
+              </td>
+              <td class="count">
+                <div class="count">
+                  <a href="${panel_href(download.id)}?order=${downloads.order};desc=${downloads.desc}">
+                    ${download.count or '0'}
+                  </a>
+                </div>
+              </td>
+              <td class="platform">
+                <div class="platform">
+                  <a href="${panel_href(download.id)}?order=${downloads.order};desc=${downloads.desc}">
+                    ${download.platform.name}
+                  </a>
+                </div>
+              </td>
+              <td class="time">
+                <div class="time">
+                  <a href="${panel_href(download.id)}?order=${downloads.order};desc=${downloads.desc}">
+                    ${format_datetime(download.time,"%d %b %Y")}
+                  </a>
+                </div>
+              </td>
+              <td class="moredetails"></td>
+            </tr>
+            <tr class="download details" style="display: none;">
+              <td class="none"></td>
+              <td class="details" colspan="8">
+                <table><tbody>
+                  <tr>
+                    <td class="header">DESCRIPTION</td>
+                    <td class="description">${wiki_to_oneliner(context(parent), download.description)}</td>
+                  </tr>
+                  <tr>
+                    <td class="header">UPLOADER</td>
+                    <td class="count">${download.author}</td>
+                  </tr>
+                  <tr>
+                    <td class="header">COMPONENT</td>
+                    <td class="component">${download.component}</td>
+                  </tr>
+                  <tr>
+                    <td class="header">VERSION</td>
+                    <td class="version">${download.version}</td>
+                  </tr>
+                  <tr>
+                    <td class="header">TYPE</td>
+                    <td class="type">${download.type.name}</td>
+                  </tr>
+                  <tr py:if="downloads.has_tags">
+                    <td class="header">TAGS</td>
+                    <td class="tags">${download.tags}</td>
+                  </tr>
+                </tbody></table>
+              </td>
+            </tr>
+          </py:for>
+        </tbody>
+      </table>
+      <br/>
+      <div class="buttons">
+        <select id="actionselector" name="actionselector">
+          <option value=""></option>
+          <option value="delete">Remove selected items</option>
+          <option value="featured">Featured</option>
+        </select>
+
+        <span class="primaryButton">
+          <input type="submit" name="remove" value="Apply" onclick="return do_confirm()"/>
+        </span>
+      </div>
+      <input type="hidden" name="action" value="multiaction"/>
+    </form>
+    </py:when>
+    <py:otherwise>
+      <p class="help">Define at least one download item and a new area will be visible in your summary page.</p>
+      <p class="help">Currently there are no download items defined.</p>
+    </py:otherwise>
+    </py:choose>
+
+    <div id="guide" class="shaded-box">
+        <h4>Guide</h4>
+        <p class="help">
+          Manage file downloads/releases for your end-users.
+        </p>
+        <p class="help">
+          &quot;Featured downloads&quot; are displayed on the project Summary tab. All downloads are displayed in the default wiki topic &quot;Downloads&quot;.
+        </p>
+        <p class="help">
+          Click the &quot;+&quot; symbol or Browse button if you use Internet Explorer to select a file to upload. The values of file attributes (platform, component, version and type) are completely user configurable through the sidebar sections of the same names. Supported file types are: ${downloads.supported_files}.
+        </p>
+        <p class="help">
+          To Feature or Remove checked files, select the required action from the list, and then press &quot;Apply&quot;.
+        </p>
+        <p class="help">
+          Your project wiki page &quot;Downloads&quot; uses the <a href="/HelpAndSupport/wiki/WikiMacros#DownloadsCount-macro">WikiMacros</a> to create links to your downloads: [[ListDownloads]], [[FeaturedDownloads]]  [[DownloadsCount]], [[CustomListDownloads ]] and [[CustomFeaturedDownloads]]. You can use these macros in any other wiki page.
+        </p>
+    </div>
+    <p id="help" class="help">
+        For more information see the <a href="/HelpAndSupport/wiki/ProjectsAdminDownloadsSystem">online help</a>.
+    </p>
+
+    <script type="text/javascript">
+      $(document).ready(function () {
+          init_components();
+          init_file_input();
+      });
+      
+        function init_components() {
+          $(".moredetails").click( function () { $(this).parent().toggleClass("active").next().toggle(); $(this).toggleClass("open")});
+          $("#file").change(function () { $("#file").data('modified','1'); });
+          $("#editbtn").click(function () {
+            if ($("#file").data('modified'))
+              return confirm("You provided a new file, this will replace the old file.\nThe operation is not reversible.\n\nReplace file?");
+            return true;
+          });
+        };
+        function init_file_input() {
+            var filename = document.createElement('div');
+            /*filename.style.background = 'url(../images/icons.png)';*/
+            filename.innerHTML = '${downloads.download.file}'
+            filename.setAttribute('id','file_filename');
+
+            var button = document.createElement('div');
+            button.className = 'button';
+            button.setAttribute('id','file_button_normal');
+
+            if ($("#file").length) {
+              $("#file").addClass("fileobject").change(function() {
+                file = $("#file").val();
+                rewin = /.*\\(.*)/;
+                reunix = /.*\/(.*)/;
+                var fileTitle = file.replace(rewin, "$1").replace(reunix, "$1"); 
+                filename.innerHTML = fileTitle;
+                filename.style.display = 'block';
+              }).mouseover(function() { button.setAttribute('id','file_button_focus');
+              }).mouseout(function() { button.setAttribute('id','file_button_normal');
+              }).css('display','block').attr("value","")
+              $("#enhanced").append(filename).append(button);
+              $("#file_button_normal").mouseover(function() { button.setAttribute('id','file_button_focus'); 
+              }).mouseout(function() { button.setAttribute('id','file_button_normal'); 
+              }).click(function () { $("#file").trigger('click'); });
+              $("#file_button_focus").mouseover(function() { button.setAttribute('id','file_button_focus');
+              }).mouseout(function() { button.setAttribute('id','file_button_normal'); 
+              }).click(function () { $("#file").trigger('click'); });
+              $("#file_filename").mouseover(function() { button.setAttribute('id','file_button_focus');
+              }).mouseout(function() { button.setAttribute('id','file_button_normal'); 
+              }).click(function () { $("#file").trigger('click'); });
+            }
+        };
+    </script>
+  </body>
+</html>

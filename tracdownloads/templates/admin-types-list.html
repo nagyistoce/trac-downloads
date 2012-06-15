@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:py="http://genshi.edgewall.org/">
+  <xi:include href="downloads-macros.html"/>
+  <xi:include href="admin.html"/>
+  <head>
+    <title>Download Architectures</title>
+  </head>
+
+  <body>
+    <h2>Types</h2>
+
+    <form id="${downloads.type.id and 'edit' or 'add'}-type-form" class="addnew" method="post" action="${panel_href()}">
+      <div class="shaded-box">
+          <fieldset id="rightpanel">
+            <legend>
+              <py:choose>
+                <py:when test="downloads.type.id">
+                  Edit Type:
+                </py:when>
+                <py:otherwise>
+                  Add Type:
+                </py:otherwise>
+              </py:choose>
+            </legend>
+
+           <div class="inputrow">
+             <div class="headtextfield">Name:</div>
+             <div class="inputfield"><input type="text" id="name" name="name" value="${downloads.type.name}"/></div>
+           </div>
+           <div class="inputrow">
+             <div class="headtextfield">Description:</div>
+             <div class="inputfield"><input type="text" id="description" name="description" value="${downloads.type.description}"/></div>
+           </div>
+            <div class="buttons">
+              <py:choose>
+                <py:when test="downloads.type.id">
+                  <span class="primaryButton">
+                    <input type="submit" name="submit" value="Edit"/>
+                  </span>
+                  <span class="primaryButton">
+                    <input type="button" name="cancel" value="Cancel" onclick="location.href = '${panel_href()}?order=${downloads.order};desc=${downloads.desc}'"/>
+                  </span>
+                  <input type="hidden" name="id" value="${downloads.type.id}"/>
+                  <input type="hidden" name="action" value="post-edit"/>
+                </py:when>
+                <py:otherwise>
+                  <span class="primaryButton">
+                    <input type="submit" name="submit" value="Add"/>
+                    <input type="hidden" name="action" value="post-add"/>
+                  </span>
+                </py:otherwise>
+              </py:choose>
+              <input type="hidden" name="order" value="${downloads.order}"/>
+              <input type="hidden" name="desc" value="${downloads.desc}"/>
+            </div>
+          </fieldset>
+      </div>
+    </form>
+
+    <py:choose>
+      <py:when test="len(downloads.types) > 0">
+        <form id="downloadplugin" method="post" action="${panel_href()}?order=${downloads.order};desc=${downloads.desc}">
+          <table class="listing">
+            <thead>
+              <tr>
+                <th class="sel">&nbsp;</th>
+                ${sortable_th(downloads.order, downloads.desc, 'id', 'ID', panel_href())}
+                ${sortable_th(downloads.order, downloads.desc, 'name', 'Name', panel_href())}
+                ${sortable_th(downloads.order, downloads.desc, 'description', 'Description', panel_href())}
+              </tr>
+            </thead>
+            <tbody>
+              <py:for each="line, type in enumerate(downloads.types)">
+                <tr class="${line % 2 and 'even' or 'odd'}">
+                  <td class="sel">
+                    <input type="checkbox" name="selection" value="${type.id}"/>
+                  </td>
+
+                  <td class="id">
+                    <div class="id">
+                      <a href="${panel_href(type.id)}?order=${downloads.order};desc=${downloads.desc}">
+                        ${type.id}
+                      </a>
+                    </div>
+                  </td>
+
+                  <td class="name">
+                    <div class="name">
+                      <a href="${panel_href(type.id)}?order=${downloads.order};desc=${downloads.desc}">
+                        ${wiki_to_oneliner(context(parent), type.name)}
+                      </a>
+                    </div>
+                  </td>
+
+                  <td class="description">
+                    <div class="description">
+                      <a href="${panel_href(type.id)}?order=${downloads.order};desc=${downloads.desc}">
+                        ${wiki_to_oneliner(context(parent), type.description)}
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              </py:for>
+            </tbody>
+          </table>
+          <br/>
+          <div class="buttons">
+            <span class="primaryButton">
+              <input type="submit" name="remove" value="Remove selected items" />
+              <input type="hidden" name="action" value="delete"/>
+            </span>
+          </div>
+
+        </form>
+      </py:when>
+      <py:otherwise>
+        <p class="help">As long as you don't add any items to the list, this field
+          will remain completely hidden from the user interface.</p>
+        <br style="clear: right"/>
+      </py:otherwise>
+    </py:choose>
+
+    <div id="guide" class="shaded-box">
+      <h4>Guide</h4>
+      <br />
+      <p class="help">
+        Use the predefined files type descriptions, or add your own that best match your project. You may edit or remove predefined types if they are not of interest to you.
+        <br/>Removing all types will disable the related dropdown in the Downloads admin menu.
+      </p>
+    </div>
+
+  </body>
+</html>
