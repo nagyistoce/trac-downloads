@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 
-from trac.core import Component, implements
+from trac.core import Component, implements, TracError
 from trac.env import IEnvironmentSetupParticipant
 
 
@@ -31,12 +31,17 @@ class DownloadsInit(Component):
         # Get current database schema version
         db_version = self._get_db_version(cursor)
         # Perform incremental upgrades
-        for I in range(db_version + 1, last_db_version + 1):
-            script_name = 'db%i' % (I)
-            module = __import__('tracdownloads.db.%s' % (script_name),
-            globals(), locals(), ['do_upgrade'])
-            module.do_upgrade(self.env, cursor)
-        cursor.close()
+        try:
+            for I in range(db_version + 1, last_db_version + 1):
+                script_name = 'db%i' % (I)
+                module = __import__('tracdownloads.db.%s' % (script_name),
+                globals(), locals(), ['do_upgrade'])
+                module.do_upgrade(self.env, cursor)
+                db.commit()
+        except:
+            raise TracError("Upgrading download plugin environment failed")
+        finally:
+            cursor.close()
 
     def _get_db_version(self, cursor):
         try:
